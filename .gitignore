@@ -1,0 +1,18 @@
+# Environment variables (secrets)
+.env
+
+# Python virtual environment
+venv/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
