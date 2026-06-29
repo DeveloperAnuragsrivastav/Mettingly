@@ -5,6 +5,7 @@ const STATUS_STYLES = {
   confirmed: 'bg-emerald-100 text-emerald-800',
   cancelled: 'bg-red-100 text-red-800',
   rescheduled: 'bg-amber-100 text-amber-800',
+  external: 'bg-slate-100 text-slate-700',
 }
 
 function formatDateTime(utcString) {
@@ -102,8 +103,19 @@ export default function BookingsTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDateTime(b.start_time_utc)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {b.caller_name}
+                  <td className="px-6 py-4 text-sm text-gray-900 min-w-[250px]">
+                    <div className="font-medium">{b.caller_name}</div>
+                    <div className="text-gray-500 text-xs mt-0.5 mb-1.5">{b.caller_email}</div>
+                    {b.custom_form_responses?.reason && (
+                      <div className="text-gray-600 text-xs truncate max-w-sm mt-1" title={b.custom_form_responses.reason}>
+                        <span className="font-medium">Reason:</span> {b.custom_form_responses.reason}
+                      </div>
+                    )}
+                    {b.custom_form_responses?.summary && (
+                      <div className="text-gray-600 text-xs truncate max-w-sm mt-0.5" title={b.custom_form_responses.summary}>
+                        <span className="font-medium">Summary:</span> {b.custom_form_responses.summary}
+                      </div>
+                    )}
                   </td>
                   {showHost && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

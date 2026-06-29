@@ -59,10 +59,10 @@ export default function MyBookingsPage() {
   // Split into upcoming vs past for display ordering
   const now = new Date()
   const upcoming = bookings
-    .filter(b => new Date(b.start_time_utc) >= now && b.status === 'confirmed')
+    .filter(b => new Date(b.start_time_utc) >= now && (b.status === 'confirmed' || b.status === 'external'))
     .sort((a, b) => new Date(a.start_time_utc) - new Date(b.start_time_utc))
   const rest = bookings
-    .filter(b => !(new Date(b.start_time_utc) >= now && b.status === 'confirmed'))
+    .filter(b => !(new Date(b.start_time_utc) >= now && (b.status === 'confirmed' || b.status === 'external')))
     .sort((a, b) => new Date(b.start_time_utc) - new Date(a.start_time_utc))
 
   return (

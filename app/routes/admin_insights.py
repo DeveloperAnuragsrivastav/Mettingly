@@ -65,7 +65,7 @@ def get_bookings(
     scope = get_role_scope_filter(member, member_col="assigned_member_id")
     
     query = supabase.table("bookings").select(
-        "id, caller_name, caller_email, start_time_utc, end_time_utc, status, assigned_member_id, google_meet_link"
+        "id, caller_name, caller_email, start_time_utc, end_time_utc, status, assigned_member_id, google_meet_link, custom_form_responses"
     )
     query = query.gte("start_time_utc", start_date.isoformat()).lte("start_time_utc", end_date.isoformat() + "T23:59:59Z")
     
@@ -80,10 +80,36 @@ def get_bookings(
             
     # Simple unpaginated or simulated pagination for now
     resp = query.order("start_time_utc", desc=True).limit(100).execute()
+    bookings_data = resp.data
+    
+    # --- EXTERNAL CALENDAR EVENTS FETCH ---
+    external_events = []
+    if status in (None, "external", "confirmed"):
+        from app.services.calendar_sync import fetch_external_events
+        
+        member_ids_to_fetch = []
+        if member.role == MemberRole.MEMBER:
+            member_ids_to_fetch = [member.id]
+        elif member.role == MemberRole.TEAM_ADMIN and member.team_id:
+            m_resp = supabase.table("members").select("id").eq("team_id", str(member.team_id)).execute()
+            member_ids_to_fetch = [m["id"] for m in m_resp.data]
+            
+        # For SUPER_ADMIN, it's too expensive to fetch the entire org synchronously.
+        if member_ids_to_fetch:
+            existing_google_ids = {b.get("google_event_id") for b in bookings_data if b.get("google_event_id")}
+            
+            for m_id in member_ids_to_fetch:
+                ext_events = fetch_external_events(m_id, start_date.isoformat(), (end_date.isoformat() + "T23:59:59Z"))
+                for ev in ext_events:
+                    if ev.get("google_event_id") not in existing_google_ids:
+                        external_events.append(ev)
+                        
+    all_items = bookings_data + external_events
+    all_items.sort(key=lambda x: x["start_time_utc"], reverse=True)
     
     return {
-        "items": resp.data,
-        "count": len(resp.data)
+        "items": all_items[:100],
+        "count": len(all_items)
     }
 
 

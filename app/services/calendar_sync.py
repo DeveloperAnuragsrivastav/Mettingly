@@ -179,3 +179,60 @@ def cancel_calendar_event(member_id: UUID, google_event_id: str):
         logger = logging.getLogger(__name__)
         logger.warning(f"Failed to cancel Google Calendar event {google_event_id} for member {member_id}: {e}")
 
+def fetch_external_events(member_id: UUID, start_date: str, end_date: str) -> List[Dict]:
+    """
+    Fetches events directly from Google Calendar for the given date range.
+    Returns them as mock 'booking' dictionaries so they can be merged into the UI.
+    """
+    try:
+        credentials = get_authenticated_calendar_client(member_id)
+    except CalendarNotConnectedError:
+        return []
+        
+    start_dt = datetime.fromisoformat(start_date).replace(tzinfo=timezone.utc).isoformat()
+    end_dt = datetime.fromisoformat(end_date).replace(tzinfo=timezone.utc).isoformat()
+    
+    url = "https://www.googleapis.com/calendar/v3/calendars/primary/events"
+    params = {
+        "timeMin": start_dt,
+        "timeMax": end_dt,
+        "singleEvents": "true",
+        "orderBy": "startTime",
+    }
+    
+    try:
+        resp = requests.get(
+            url,
+            params=params,
+            headers={"Authorization": f"Bearer {credentials.token}"},
+            timeout=10
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        
+        external_bookings = []
+        for item in data.get("items", []):
+            # Skip full-day events (they don't have dateTime)
+            if "dateTime" not in item.get("start", {}):
+                continue
+                
+            external_bookings.append({
+                "id": f"ext_{item.get('id')}",
+                "caller_name": "Google Calendar Event",
+                "caller_email": "External",
+                "start_time_utc": item["start"]["dateTime"],
+                "end_time_utc": item["end"]["dateTime"],
+                "status": "external",
+                "assigned_member_id": str(member_id),
+                "google_meet_link": None,
+                "google_event_id": item.get("id"),
+                "custom_form_responses": {
+                    "summary": item.get("summary", "Busy")
+                }
+            })
+        return external_bookings
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Failed to fetch external Google Calendar events for member {member_id}: {e}")
+        return []
