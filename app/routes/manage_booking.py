@@ -42,7 +42,7 @@ def get_booking_by_token(token: str):
     return b_resp.data[0]
 
 
-@router.get("/manage/{token}")
+@router.get("/api/manage/{token}")
 @limiter.limit("10/minute")
 def get_booking_details(request: Request, token: str):
     supabase = get_supabase_client()
@@ -91,7 +91,7 @@ def get_booking_details(request: Request, token: str):
     }
 
 
-@router.post("/manage/{token}/cancel")
+@router.post("/api/manage/{token}/cancel")
 @limiter.limit("10/minute")
 def cancel_booking(request: Request, token: str, req: CancelBookingRequest):
     booking = get_booking_by_token(token)
@@ -135,7 +135,7 @@ def cancel_booking(request: Request, token: str, req: CancelBookingRequest):
     return {"success": True, "message": "Booking cancelled successfully."}
 
 
-@router.post("/manage/{token}/reschedule")
+@router.post("/api/manage/{token}/reschedule")
 @limiter.limit("10/minute")
 def reschedule_booking(request: Request, token: str, req: RescheduleBookingRequest):
     import uuid
