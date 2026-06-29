@@ -326,3 +326,21 @@ uvicorn app.main:app --reload
 
 ### 🔲 Phase 2 — TBD
 ### 🔲 Phase 3 — TBD
+
+---
+
+### ✅ Phase 8.1 — Bug Fixes & Stabilization
+**Completed**:
+- **Frontend Crash**: Fixed missing `Toaster` import in `App.jsx` which caused the root path to render a blank white screen.
+- **Reschedule Link Crash**: Corrected a mismatched property reference (`booking.start_time_utc` -> `booking.start_time`) in `ManageBookingPage.jsx` which was causing `parseISO` to crash with `undefined` on the `/manage/:token` route when users clicked links in their emails.
+
+---
+
+### ✅ Phase 8.2 — Notification Throttling & Premium Email Layout (2026-06-26)
+
+**Goal**: Elevate all transactional emails to industry standards and fix severe alert spam regarding calendar disconnections.
+
+**What was built**:
+- **Notification Throttling Engine**: Modified `app/services/notifications.py` to intercept `calendar_not_connected_member` and `calendar_not_connected_admin` triggers. The backend now executes a 24-hour lookback query against the `notifications` table ledger and silently drops duplicate alerts for the same member, restoring industry-standard alerting cadence.
+- **Jinja2 Template Inheritance**: Created a premium `base.html` layout utilizing HTML tables for cross-client compatibility. The template includes a `#f9fafb` backdrop, centered white card, clean typography, and standardized footers.
+- **Transactional UX Upgrade**: Rewrote all 9 existing plain-text HTML templates to `{% extends "base.html" %}`. All transactional links ("Join Google Meet", "Reschedule") were upgraded into prominent indigo and green CTA buttons.

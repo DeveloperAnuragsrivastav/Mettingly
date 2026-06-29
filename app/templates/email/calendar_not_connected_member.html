@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block header_title %}Action Required: Connect Calendar{% endblock %}
+
+{% block content %}
+<p>Hi {{ first_name }},</p>
+<p>We noticed your Google Calendar is either disconnected or its permissions have expired.</p>
+<p>Because of this, <strong>you can no longer receive bookings</strong> on your personal availability schedule, and any new bookings made on your team's pages will fail to sync to your calendar.</p>
+
+<div style="margin-top: 32px; text-align: center;">
+    <a href="{{ FRONTEND_URL }}/dashboard/calendar" class="button">Reconnect Google Calendar</a>
+</div>
+{% endblock %}

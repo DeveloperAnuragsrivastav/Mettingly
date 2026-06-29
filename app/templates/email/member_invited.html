@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block header_title %}You've been invited!{% endblock %}
+
+{% block content %}
+<p>You have been invited to join <strong>{{ organization_name }}</strong>.</p>
+<p>Welcome to the team! You can now manage your availability and receive bookings.</p>
+
+<div style="margin-top: 32px; text-align: center;">
+    <a href="{{ FRONTEND_URL }}/set-password" class="button">Set Up Your Account</a>
+</div>
+{% endblock %}

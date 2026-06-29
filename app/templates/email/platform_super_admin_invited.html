@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block header_title %}Platform Super Admin Invitation{% endblock %}
+
+{% block content %}
+<p>You have been invited to join the platform as a Super Admin.</p>
+<p>You now have full administrative access to all organizations and settings on the platform.</p>
+
+<div style="margin-top: 32px; text-align: center;">
+    <a href="{{ FRONTEND_URL }}/set-password" class="button">Set Up Your Account</a>
+</div>
+{% endblock %}

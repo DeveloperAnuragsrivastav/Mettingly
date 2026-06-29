@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends
 
 from app.dependencies.auth import get_current_member
 from app.models.member import Member, MemberProfileResponse
+from app.services.supabase import get_supabase_client
 
 router = APIRouter(tags=["Profile"])
 
@@ -31,11 +32,19 @@ async def get_my_profile(
     The member must have an active (non-deleted) row in the ``members``
     table linked via ``auth_user_id``.
     """
+    team_slug = None
+    if member.team_id:
+        supabase = get_supabase_client()
+        res = supabase.table("teams").select("slug").eq("id", member.team_id).limit(1).execute()
+        if res.data:
+            team_slug = res.data[0]["slug"]
+
     return MemberProfileResponse(
         id=member.id,
         full_name=member.full_name,
         email=member.email,
         role=member.role,
         team_id=member.team_id,
+        team_slug=team_slug,
         organization_id=member.organization_id,
     )

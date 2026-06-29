@@ -5,3 +5,9 @@ PyJWT>=2.8.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
+email-validator>=2.0.0
+requests
+sendgrid>=6.9.0
+APScheduler>=3.10.0
+jinja2>=3.1.0
+slowapi>=0.1.9

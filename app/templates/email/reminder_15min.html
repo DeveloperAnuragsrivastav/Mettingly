@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block header_title %}Meeting in 15 Minutes{% endblock %}
+
+{% block content %}
+<p>Hi {{ first_name }},</p>
+<p>Your meeting with <strong>{{ other_party_name }}</strong> is starting in 15 minutes.</p>
+
+<div class="details-box">
+    <div class="details-row"><span class="details-label">Time:</span> <span class="details-value">{{ formatted_start_time }} ({{ timezone }})</span></div>
+    <div class="details-row"><span class="details-label">Duration:</span> <span class="details-value">{{ (booking.duration_minutes | default(30)) }} minutes</span></div>
+</div>
+
+{% if booking.google_meet_link %}
+<p style="margin-top: 24px; margin-bottom: 8px;"><strong>Meeting Link</strong></p>
+<a href="{{ booking.google_meet_link }}" class="button" style="background-color: #059669;">Join Google Meet</a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block header_title %}Booking Cancelled{% endblock %}
+
+{% block content %}
+<p>Hi {{ first_name }},</p>
+<p>Your meeting with <strong>{{ other_party_name }}</strong> has been cancelled.</p>
+
+<div class="details-box">
+    <div class="details-row"><span class="details-label">Time:</span> <span class="details-value">{{ formatted_start_time }} ({{ timezone }})</span></div>
+    {% if cancellation_reason %}
+    <div class="details-row" style="margin-top: 8px; color: #dc2626;"><span class="details-label">Reason:</span> <span class="details-value">{{ cancellation_reason }}</span></div>
+    {% endif %}
+</div>
+
+<p>This time has been removed from your calendar.</p>
+{% endblock %}

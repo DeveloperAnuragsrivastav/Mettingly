@@ -44,4 +44,61 @@ class MemberProfileResponse(BaseModel):
     email: str
     role: MemberRole
     team_id: Optional[UUID] = None
+    team_slug: Optional[str] = None
     organization_id: UUID
+
+
+# ── Members CRUD Models ─────────────────────────────────────────────
+
+
+class MemberInviteRequest(BaseModel):
+    """Request body for POST /members/invite."""
+
+    full_name: str
+    email: EmailStr
+    team_id: Optional[UUID] = None
+    role: MemberRole
+
+
+class UpdateMemberRoleRequest(BaseModel):
+    """Request body for PATCH /members/{member_id}/role."""
+
+    new_role: MemberRole
+
+
+class MemberInviteResponse(BaseModel):
+    """Response body for a successfully invited member."""
+
+    id: UUID
+    full_name: str
+    email: str
+    role: MemberRole
+    team_id: Optional[UUID] = None
+    organization_id: UUID
+    onboarding_status: str  # Always "pending" on invite (auth_user_id is NULL)
+
+
+class MemberListItem(BaseModel):
+    """
+    Single member row in the GET /members response.
+
+    Includes a computed ``onboarding_status``:
+    - ``"pending"`` — auth_user_id IS NULL (invited but not yet signed up)
+    - ``"active"``  — auth_user_id IS NOT NULL and deleted_at IS NULL
+    """
+
+    id: UUID
+    organization_id: UUID
+    team_id: Optional[UUID] = None
+    role: MemberRole
+    full_name: str
+    email: str
+    is_active_for_booking: bool
+    onboarding_status: str
+
+
+class DeleteMemberResponse(BaseModel):
+    """Response body for DELETE /members/{member_id}."""
+
+    detail: str
+    member_id: UUID

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block header_title %}Booking Confirmed{% endblock %}
+
+{% block content %}
+<p>Hi {{ first_name }},</p>
+<p>Your meeting with <strong>{{ other_party_name }}</strong> is confirmed.</p>
+
+<div class="details-box">
+    <div class="details-row"><span class="details-label">Time:</span> <span class="details-value">{{ formatted_start_time }} ({{ timezone }})</span></div>
+    <div class="details-row"><span class="details-label">Duration:</span> <span class="details-value">{{ (booking.duration_minutes | default(30)) }} minutes</span></div>
+    {% if booking.custom_form_responses.reason %}
+    <div class="details-row"><span class="details-label">Reason:</span> <span class="details-value">{{ booking.custom_form_responses.reason }}</span></div>
+    {% endif %}
+    {% if booking.custom_form_responses.summary %}
+    <div class="details-row"><span class="details-label">Summary:</span> <span class="details-value">{{ booking.custom_form_responses.summary }}</span></div>
+    {% endif %}
+</div>
+
+{% if booking.google_meet_link %}
+<p style="margin-top: 24px; margin-bottom: 8px;"><strong>Meeting Link</strong></p>
+<a href="{{ booking.google_meet_link }}" class="button" style="background-color: #059669;">Join Google Meet</a>
+{% endif %}
+
+{% if manage_url %}
+<div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #f3f4f6;">
+    <p style="color: #6b7280; font-size: 14px;">Need to make a change?</p>
+    <a href="{{ manage_url }}" class="button">Reschedule or Cancel</a>
+</div>
+{% endif %}
+{% endblock %}

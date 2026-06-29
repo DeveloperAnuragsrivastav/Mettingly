@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block header_title %}Alert: Team Member Disconnected{% endblock %}
+
+{% block content %}
+<p>Hi {{ first_name }},</p>
+<p>This is an alert to let you know that <strong>{{ affected_member_name }}</strong>'s Google Calendar integration has failed or expired.</p>
+<p>They have been automatically removed from the active booking rotation for their team ({{ team_name }}) until they reconnect their calendar.</p>
+<p>We've already sent them an email asking them to reconnect, but you may want to follow up with them internally.</p>
+
+<div style="margin-top: 32px; text-align: center;">
+    <a href="{{ FRONTEND_URL }}/dashboard/my-team" class="button">View Team Settings</a>
+</div>
+{% endblock %}

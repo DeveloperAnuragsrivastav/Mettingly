@@ -6,10 +6,13 @@ Authorization is enforced in the FastAPI layer instead.
 """
 
 from functools import lru_cache
-
-from supabase import Client, create_client
-
+import os
+import logging
+from supabase import create_client, Client
 from app.config import get_settings
+
+# Enable debug logging for httpx so we can see outgoing requests to Supabase REST API
+logging.getLogger("httpx").setLevel(logging.DEBUG)
 
 
 @lru_cache
