@@ -140,17 +140,20 @@ def queue_reminder_notifications(booking_id: UUID):
     member_email = booking["members"]["email"] if booking.get("members") else ""
     
     start_dt = datetime.fromisoformat(booking["start_time_utc"].replace("Z", "+00:00"))
+    now = datetime.now(timezone.utc)
     
     rem1_dt = start_dt - timedelta(days=1)
     rem15_dt = start_dt - timedelta(minutes=15)
     
-    queue_notification(org_id, booking_id, member_id, "reminder_1day", caller_email, rem1_dt)
-    if member_email:
-        queue_notification(org_id, booking_id, member_id, "reminder_1day", member_email, rem1_dt)
-        
-    queue_notification(org_id, booking_id, member_id, "reminder_15min", caller_email, rem15_dt)
-    if member_email:
-        queue_notification(org_id, booking_id, member_id, "reminder_15min", member_email, rem15_dt)
+    if rem1_dt > now:
+        queue_notification(org_id, booking_id, member_id, "reminder_1day", caller_email, rem1_dt)
+        if member_email:
+            queue_notification(org_id, booking_id, member_id, "reminder_1day", member_email, rem1_dt)
+            
+    if rem15_dt > now:
+        queue_notification(org_id, booking_id, member_id, "reminder_15min", caller_email, rem15_dt)
+        if member_email:
+            queue_notification(org_id, booking_id, member_id, "reminder_15min", member_email, rem15_dt)
 
 
 def render_email_template(notification_type: str, context: dict) -> dict:
@@ -356,13 +359,17 @@ def queue_reschedule_notifications(old_booking_id: UUID, new_booking_id: UUID):
         
     # 5. Queue NEW Reminders
     start_dt = datetime.fromisoformat(new_booking["start_time_utc"].replace("Z", "+00:00"))
+    now = datetime.now(timezone.utc)
+    
     rem1_dt = start_dt - timedelta(days=1)
     rem15_dt = start_dt - timedelta(minutes=15)
     
-    queue_notification(org_id, new_booking_id, member_id, "reminder_1day", caller_email, rem1_dt)
-    if member_email:
-        queue_notification(org_id, new_booking_id, member_id, "reminder_1day", member_email, rem1_dt)
-        
-    queue_notification(org_id, new_booking_id, member_id, "reminder_15min", caller_email, rem15_dt)
-    if member_email:
-        queue_notification(org_id, new_booking_id, member_id, "reminder_15min", member_email, rem15_dt)
+    if rem1_dt > now:
+        queue_notification(org_id, new_booking_id, member_id, "reminder_1day", caller_email, rem1_dt)
+        if member_email:
+            queue_notification(org_id, new_booking_id, member_id, "reminder_1day", member_email, rem1_dt)
+            
+    if rem15_dt > now:
+        queue_notification(org_id, new_booking_id, member_id, "reminder_15min", caller_email, rem15_dt)
+        if member_email:
+            queue_notification(org_id, new_booking_id, member_id, "reminder_15min", member_email, rem15_dt)
