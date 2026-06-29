@@ -12,6 +12,9 @@
     {% if booking.custom_form_responses.reason %}
     <div class="details-row"><span class="details-label">Reason:</span> <span class="details-value">{{ booking.custom_form_responses.reason }}</span></div>
     {% endif %}
+    {% if booking.custom_form_responses.summary %}
+    <div class="details-row"><span class="details-label">Summary:</span> <span class="details-value">{{ booking.custom_form_responses.summary }}</span></div>
+    {% endif %}
 </div>
 
 {% if booking.google_meet_link %}

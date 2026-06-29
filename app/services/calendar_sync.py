@@ -48,9 +48,17 @@ def sync_booking_to_calendar(booking_id: UUID) -> Dict:
     caller_name = booking.get("caller_name") or "Customer"
     caller_email = booking.get("caller_email")
     
+    description = "Booked via Meeting SaaS"
+    responses = booking.get("custom_form_responses") or {}
+    
+    if responses.get("reason"):
+        description += f"\n\nReason for meeting:\n{responses['reason']}"
+    if responses.get("summary"):
+        description += f"\n\nMeeting summary:\n{responses['summary']}"
+
     event_payload = {
         "summary": f"Meeting with {caller_name}",
-        "description": "Booked via Meeting SaaS",
+        "description": description,
         "start": {
             "dateTime": booking["start_time_utc"],
             "timeZone": "UTC"
