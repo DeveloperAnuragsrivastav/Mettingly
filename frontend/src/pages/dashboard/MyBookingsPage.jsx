@@ -123,6 +123,7 @@ export default function MyBookingsPage() {
               <option value="confirmed">Confirmed</option>
               <option value="cancelled">Cancelled</option>
               <option value="rescheduled">Rescheduled</option>
+              <option value="external">External (Google Calendar)</option>
             </select>
           </div>
         </div>

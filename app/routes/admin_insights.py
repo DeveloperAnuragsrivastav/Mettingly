@@ -93,8 +93,9 @@ def get_bookings(
         elif member.role == MemberRole.TEAM_ADMIN and member.team_id:
             m_resp = supabase.table("members").select("id").eq("team_id", str(member.team_id)).execute()
             member_ids_to_fetch = [m["id"] for m in m_resp.data]
-            
-        # For SUPER_ADMIN, it's too expensive to fetch the entire org synchronously.
+        elif member.role == MemberRole.SUPER_ADMIN:
+            m_resp = supabase.table("members").select("id").eq("organization_id", str(member.organization_id)).execute()
+            member_ids_to_fetch = [m["id"] for m in m_resp.data]
         if member_ids_to_fetch:
             existing_google_ids = {b.get("google_event_id") for b in bookings_data if b.get("google_event_id")}
             

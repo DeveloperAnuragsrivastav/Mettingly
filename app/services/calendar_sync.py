@@ -189,8 +189,13 @@ def fetch_external_events(member_id: UUID, start_date: str, end_date: str) -> Li
     except CalendarNotConnectedError:
         return []
         
-    start_dt = datetime.fromisoformat(start_date).replace(tzinfo=timezone.utc).isoformat()
-    end_dt = datetime.fromisoformat(end_date).replace(tzinfo=timezone.utc).isoformat()
+    try:
+        start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00")).astimezone(timezone.utc).isoformat()
+        end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00")).astimezone(timezone.utc).isoformat()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Date parse error in fetch_external_events: {e}")
+        return []
     
     url = "https://www.googleapis.com/calendar/v3/calendars/primary/events"
     params = {
