@@ -180,73 +180,81 @@ export default function AvailabilityPage() {
       />
 
       {/* Date Blocks */}
-      <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden mt-12">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
-          <h2 className="text-lg font-medium text-gray-900">Time Off & Specific Dates</h2>
-          <p className="text-sm text-gray-500 mt-1">Block out entire days or partial days for vacation, holidays, or personal time.</p>
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl mt-12">
+        <div className="px-6 py-4 border-b border-outline-variant bg-surface-bright/50 rounded-t-xl">
+          <h3 className="font-headline-md text-headline-md text-on-surface mb-1">Time Off &amp; Specific Dates</h3>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">Block out entire days or partial days for vacation, holidays, or personal time.</p>
         </div>
         
         <div className="p-6">
-          <form onSubmit={handleCreateBlock} className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-8 space-y-4">
-            <h3 className="text-sm font-medium text-gray-900">Add Date Block</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Date</label>
+          <form onSubmit={handleCreateBlock} className="bg-surface-bright border border-outline-variant rounded-xl p-6 mb-8 space-y-4">
+            <h4 className="font-label-md text-label-md text-on-surface mb-4">Add Date Block</h4>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+              <div className="md:col-span-4">
+                <label className="block font-body-sm text-body-sm text-on-surface-variant mb-1.5">Date</label>
                 <input 
                   type="date" 
                   required
                   value={newBlock.block_date}
                   onChange={e => setNewBlock(prev => ({...prev, block_date: e.target.value}))}
-                  className="block w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500" 
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" 
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Reason (Optional)</label>
+              <div className="md:col-span-5">
+                <label className="block font-body-sm text-body-sm text-on-surface-variant mb-1.5">Reason (Optional)</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Vacation"
                   value={newBlock.reason}
                   onChange={e => setNewBlock(prev => ({...prev, reason: e.target.value}))}
-                  className="block w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500" 
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" 
                 />
               </div>
-              <div className="flex items-center mt-6">
-                <input 
-                  type="checkbox" 
-                  id="full_day"
-                  checked={newBlock.is_full_day}
-                  onChange={e => setNewBlock(prev => ({...prev, is_full_day: e.target.checked}))}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label htmlFor="full_day" className="ml-2 block text-sm text-gray-900">
-                  Full Day
+              <div className="md:col-span-3 flex items-center gap-4 pb-2">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    id="full_day"
+                    checked={newBlock.is_full_day}
+                    onChange={e => setNewBlock(prev => ({...prev, is_full_day: e.target.checked}))}
+                    className="peer appearance-none w-5 h-5 border border-outline-variant rounded bg-surface-container-lowest checked:bg-primary checked:border-primary transition-colors cursor-pointer focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  />
+                  <span className="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">Full Day</span>
                 </label>
               </div>
-              {!newBlock.is_full_day && (
-                <div className="flex items-center gap-2 mt-6 lg:mt-0">
+            </div>
+
+            {!newBlock.is_full_day && (
+              <div className="flex items-center gap-3 pt-2">
+                <div className="w-32">
+                  <label className="block font-body-sm text-body-sm text-on-surface-variant mb-1.5">Start Time</label>
                   <input 
                     type="time" 
                     required={!newBlock.is_full_day}
                     value={newBlock.partial_start_time}
                     onChange={e => setNewBlock(prev => ({...prev, partial_start_time: e.target.value}))}
-                    className="block w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500" 
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" 
                   />
-                  <span className="text-gray-500">-</span>
+                </div>
+                <span className="text-on-surface-variant pt-6">-</span>
+                <div className="w-32">
+                  <label className="block font-body-sm text-body-sm text-on-surface-variant mb-1.5">End Time</label>
                   <input 
                     type="time" 
                     required={!newBlock.is_full_day}
                     value={newBlock.partial_end_time}
                     onChange={e => setNewBlock(prev => ({...prev, partial_end_time: e.target.value}))}
-                    className="block w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500" 
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow" 
                   />
                 </div>
-              )}
-            </div>
-            <div>
+              </div>
+            )}
+
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={isAddingBlock}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="px-5 py-2 bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all border border-primary/20 disabled:opacity-50"
               >
                 {isAddingBlock ? 'Adding...' : 'Add Time Off'}
               </button>
@@ -254,34 +262,34 @@ export default function AvailabilityPage() {
           </form>
 
           {dateBlocks.length > 0 ? (
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Date</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Type</th>
-                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Reason</th>
-                    <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+            <div className="overflow-hidden border border-outline-variant rounded-xl shadow-sm">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-outline-variant bg-surface-bright">
+                    <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">Date</th>
+                    <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">Type</th>
+                    <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">Reason</th>
+                    <th className="relative py-3 px-6 text-right">
                       <span className="sr-only">Actions</span>
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-outline-variant bg-surface-container-lowest">
                   {dateBlocks.map((block) => (
-                    <tr key={block.id}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                    <tr key={block.id} className="hover:bg-surface-container-low/50 transition-colors">
+                      <td className="whitespace-nowrap py-4 px-6 text-sm font-medium text-on-surface">
                         {block.block_date}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-on-surface-variant">
                         {block.is_full_day ? 'Full Day' : `${block.partial_start_time?.substring(0,5)} - ${block.partial_end_time?.substring(0,5)}`}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-on-surface-variant">
                         {block.reason || '-'}
                       </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                      <td className="relative whitespace-nowrap py-4 px-6 text-right text-sm font-medium">
                         <button
                           onClick={() => setConfirmDelete({ isOpen: true, blockId: block.id })}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-error hover:text-red-700 transition-colors"
                         >
                           Delete
                         </button>
@@ -292,8 +300,8 @@ export default function AvailabilityPage() {
               </table>
             </div>
           ) : (
-            <div className="text-center py-8 text-sm text-gray-500">
-              No upcoming time off scheduled.
+            <div className="py-12 flex flex-col items-center justify-center text-center">
+              <p className="font-body-md text-body-md text-on-surface-variant">No upcoming time off scheduled.</p>
             </div>
           )}
         </div>

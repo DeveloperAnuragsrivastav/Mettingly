@@ -3,10 +3,10 @@ import { Video, ExternalLink, Mail, Copy, CheckSquare, Square, FileText } from '
 import { insightsApi } from '../../api/insights'
 
 const STATUS_STYLES = {
-  confirmed: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-red-100 text-red-800',
-  rescheduled: 'bg-amber-100 text-amber-800',
-  external: 'bg-slate-100 text-slate-700',
+  confirmed: 'bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0]',
+  cancelled: 'bg-error-container text-on-error-container border border-error/20',
+  rescheduled: 'bg-[#fffbeb] text-[#854d0e] border border-[#fef08a]',
+  external: 'bg-[#f1f5f9] text-[#475569] border border-[#e2e8f0]',
 }
 
 function formatDateTime(utcString) {
@@ -354,61 +354,61 @@ export default function BookingsTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <table className="w-full text-left border-collapse min-w-[900px] divide-y divide-outline-variant">
+        <thead>
+          <tr className="border-b border-outline-variant bg-surface-bright">
+            <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">
               Date &amp; Time
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">
               Caller
             </th>
             {showHost && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">
                 Host
               </th>
             )}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">
               Duration
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">
               Status
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">
+            <th className="py-3 px-lg font-label-md text-label-md text-primary font-medium tracking-wide uppercase text-[11px]">
               <div className="flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
                   <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
                   <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
                 </svg>
                 AI Insight
               </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">
               Follow-up
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px]">
               Internal Notes
             </th>
             {showMeetLink && (
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="py-3 px-lg font-label-md text-label-md text-on-surface-variant font-medium tracking-wide uppercase text-[11px] text-right">
                 Meet
               </th>
             )}
           </tr>
         </thead>
-        <tbody className={`bg-white divide-y divide-gray-200 ${isLoading && bookings.length > 0 ? 'opacity-50 pointer-events-none transition-opacity duration-200' : ''}`}>
+        <tbody className={`divide-y divide-outline-variant ${isLoading && bookings.length > 0 ? 'opacity-50 pointer-events-none transition-opacity duration-200' : ''}`}>
           {isLoading && bookings.length === 0 ? (
             <tr>
-              <td colSpan={colCount} className="px-6 py-8 text-center text-gray-500">
+              <td colSpan={colCount} className="py-8 px-lg text-center text-on-surface-variant">
                 <div className="flex items-center justify-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin text-gray-400"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin text-primary"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                   Loading bookings…
                 </div>
               </td>
             </tr>
           ) : bookings.length === 0 ? (
             <tr>
-              <td colSpan={colCount} className="px-6 py-8 text-center text-gray-500">
+              <td colSpan={colCount} className="py-8 px-lg text-center text-on-surface-variant font-body-md text-body-md">
                 {emptyMessage}
               </td>
             </tr>
@@ -419,73 +419,64 @@ export default function BookingsTable({
               const canJoin = upcoming && b.status === 'confirmed' && b.google_meet_link
 
               return (
-                <tr key={b.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={b.id} className="hover:bg-surface-container-low/50 transition-colors">
                   {/* Date */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDateTime(b.start_time_utc)}
+                  <td className="py-md px-lg align-top">
+                    <div className="font-body-md text-body-md text-on-surface font-medium whitespace-nowrap">
+                      {formatDateTime(b.start_time_utc)}
+                    </div>
                   </td>
 
                   {/* Caller */}
-                  <td className="px-6 py-4 text-sm text-gray-900 min-w-[240px]">
-                    <div className="font-medium">{b.caller_name}</div>
-                    <div className="text-gray-500 text-xs mt-0.5 mb-1">{b.caller_email}</div>
+                  <td className="py-md px-lg align-top">
+                    <div className="font-label-md text-label-md text-on-surface font-semibold">{b.caller_name}</div>
+                    <div className="font-body-sm text-body-sm text-on-surface-variant mb-2">{b.caller_email}</div>
 
                     {b.custom_form_responses?.reason && (
-                      <div className="group relative mt-1 max-w-xs">
-                        <div className="text-gray-600 text-xs truncate">
-                          <span className="font-medium">Reason:</span> {b.custom_form_responses.reason}
-                        </div>
-                        <Tooltip text={`Reason: ${b.custom_form_responses.reason}`} />
+                      <div className="font-body-sm text-body-sm text-on-surface">
+                        <span className="font-medium">Reason:</span> {b.custom_form_responses.reason}
                       </div>
                     )}
 
                     {b.custom_form_responses?.summary && (
-                      <div className="group relative mt-0.5 max-w-xs">
-                        <div className="text-gray-600 text-xs truncate">
-                          <span className="font-medium">Summary:</span> {b.custom_form_responses.summary}
-                        </div>
-                        <Tooltip text={`Summary: ${b.custom_form_responses.summary}`} />
+                      <div className="font-body-sm text-body-sm text-on-surface">
+                        <span className="font-medium">Summary:</span> {b.custom_form_responses.summary}
                       </div>
                     )}
 
                     {/* AI TLDR inline badge */}
                     {b.ai_tldr && (
-                      <div className="group relative mt-2 max-w-xs">
-                        <div className="flex items-center gap-1 pl-2.5 border-l-2 border-purple-300 bg-gradient-to-r from-purple-50 to-transparent py-1 pr-2 rounded-r text-purple-800 text-xs truncate">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 text-purple-500">
-                            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-                          </svg>
-                          <span className="italic truncate">{b.ai_tldr}</span>
-                        </div>
-                        <AiTooltip text={b.ai_tldr} />
+                      <div className="mt-2 text-primary font-body-sm text-body-sm italic flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary flex-shrink-0">
+                          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                        </svg>
+                        {b.ai_tldr}
                       </div>
                     )}
 
                     {/* Prep Notes accordion — member view only, upcoming confirmed */}
                     {!showHost && upcoming && b.status === 'confirmed' && (
-                      <details className="mt-2.5 group/details bg-purple-50 rounded-lg border border-purple-100 overflow-hidden max-w-xs open:pb-2.5 open:shadow-sm">
-                        <summary className="cursor-pointer px-2.5 py-1.5 text-xs font-semibold text-purple-700 flex items-center justify-between hover:bg-purple-100 transition-colors list-none [&::-webkit-details-marker]:hidden select-none">
+                      <details className="mt-3 group bg-primary-container/10 rounded-lg border border-primary/10 overflow-hidden max-w-xs open:pb-2.5 open:shadow-sm">
+                        <summary className="cursor-pointer px-2.5 py-1.5 text-xs font-semibold text-primary flex items-center justify-between hover:bg-primary-container/20 transition-colors list-none [&::-webkit-details-marker]:hidden select-none">
                           <span className="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500">
-                              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                            </svg>
+                            <span className="material-symbols-outlined text-[16px]">menu_book</span>
                             AI Prep Notes
                           </span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400 group-open/details:rotate-180 transition-transform">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary/70 group-open:rotate-180 transition-transform">
                             <path d="m6 9 6 6 6-6"/>
                           </svg>
                         </summary>
-                        <div className="px-2.5 pt-1.5 border-t border-purple-100">
+                        <div className="px-2.5 pt-1.5 border-t border-primary/10">
                           {b.ai_meeting_prep_status === 'generated' ? (
                             <div className="space-y-1.5">
                               {(b.ai_meeting_prep_content?.is_repeat_caller === true || b.ai_meeting_prep_content?.is_repeat_caller === 'true') && (
-                                <span className="inline-block px-1.5 py-0.5 bg-purple-200 text-purple-800 text-[10px] font-bold rounded uppercase tracking-wider">🔄 Repeat Caller</span>
+                                <span className="inline-block px-1.5 py-0.5 bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold rounded uppercase tracking-wider">🔄 Repeat Caller</span>
                               )}
-                              <p className="text-xs text-gray-700 leading-relaxed">{b.ai_meeting_prep_content?.caller_context}</p>
+                              <p className="text-xs text-on-surface leading-relaxed">{b.ai_meeting_prep_content?.caller_context}</p>
                               {b.ai_meeting_prep_content?.talking_points?.length > 0 && (
                                 <div>
-                                  <p className="text-[11px] font-semibold text-purple-800 mb-0.5">Talking Points:</p>
-                                  <ul className="list-disc pl-4 text-xs text-gray-600 space-y-0.5">
+                                  <p className="text-[11px] font-semibold text-primary mb-0.5">Talking Points:</p>
+                                  <ul className="list-disc pl-4 text-xs text-on-surface-variant space-y-0.5">
                                     {b.ai_meeting_prep_content.talking_points.map((pt, i) => (
                                       <li key={i}>{pt}</li>
                                     ))}
@@ -494,7 +485,7 @@ export default function BookingsTable({
                               )}
                             </div>
                           ) : (
-                            <p className="text-xs text-purple-400 italic">Available closer to meeting time.</p>
+                            <p className="text-xs text-primary/70 italic">Available closer to meeting time.</p>
                           )}
                         </div>
                       </details>
@@ -503,76 +494,76 @@ export default function BookingsTable({
 
                   {/* Host */}
                   {showHost && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="py-md px-lg align-top font-body-md text-body-md text-on-surface">
                       {membersMap[b.assigned_member_id]?.full_name || 'Unknown'}
                     </td>
                   )}
 
                   {/* Duration */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="py-md px-lg align-top font-body-md text-body-md text-on-surface-variant whitespace-nowrap">
                     {duration ? `${duration} min` : '—'}
                   </td>
 
                   {/* Status */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[b.status] || 'bg-gray-100 text-gray-800'}`}>
+                  <td className="py-md px-lg align-top">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[12px] font-medium capitalize ${STATUS_STYLES[b.status] || 'bg-gray-100 text-gray-800'}`}>
                       {b.status}
                     </span>
                   </td>
 
                   {/* AI Insight */}
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="py-md px-lg align-top">
                     {b.ai_summary_status === 'pending' ? (
-                      <span className="text-purple-400 text-xs italic flex items-center gap-1 animate-pulse">
+                      <span className="text-primary text-xs italic flex items-center gap-1 animate-pulse">
                         <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                         Generating…
                       </span>
                     ) : b.ai_summary_status === 'generated' ? (
-                      <div className="flex flex-col gap-1">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium w-fit capitalize shadow-sm border ${
-                          b.ai_priority === 'high'   ? 'bg-red-50 text-red-700 border-red-200' :
-                          b.ai_priority === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                          'bg-gray-50 text-gray-600 border-gray-200'
+                      <div className="flex flex-col gap-1.5 items-start">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium w-fit capitalize border ${
+                          b.ai_priority === 'high'   ? 'bg-[#fef2f2] text-[#991b1b] border-[#fecaca]' :
+                          b.ai_priority === 'medium' ? 'bg-[#fefce8] text-[#854d0e] border-[#fef08a]' :
+                          'bg-surface-container-high text-on-surface-variant border-outline-variant'
                         }`}>
                           {b.ai_priority} Priority
                         </span>
                         {b.ai_category && (
-                          <span className="text-[10px] font-semibold tracking-wide uppercase text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100 w-fit">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-primary-container text-on-primary text-xs font-semibold tracking-wider uppercase">
                             {b.ai_category}
                           </span>
                         )}
                       </div>
                     ) : (
-                      <span className="text-gray-300 text-sm">—</span>
+                      <span className="text-on-surface-variant/30">—</span>
                     )}
                   </td>
 
                   {/* Follow-up */}
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="py-md px-lg align-top">
                     <FollowupCell booking={b} isAdminView={showHost} />
                   </td>
 
                   {/* Meeting Notes */}
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="py-md px-lg align-top">
                     <MeetingNotesCell booking={b} isAdminView={showHost} />
                   </td>
 
                   {/* Meet link */}
                   {showMeetLink && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="py-md px-lg align-top text-right">
                       {canJoin ? (
                         <a
                           href={b.google_meet_link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 font-medium text-xs hover:bg-indigo-100 transition-colors"
+                          className="inline-flex items-center justify-center gap-2 bg-surface-container border border-primary/30 text-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-primary-container transition-colors"
                         >
-                          <Video className="w-3.5 h-3.5" />
+                          <Video className="w-[18px] h-[18px]" />
                           Join
-                          <ExternalLink className="w-3 h-3" />
+                          <ExternalLink className="w-[16px] h-[16px]" />
                         </a>
                       ) : (
-                        <span className="text-gray-300">—</span>
+                        <span className="text-on-surface-variant/30">—</span>
                       )}
                     </td>
                   )}

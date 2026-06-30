@@ -38,48 +38,44 @@ export default function AvailabilityEditor({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-xl pb-6 fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2">{title}</h2>
         {description && (
-          <p className="mt-1 text-sm text-gray-500">{description}</p>
+          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">{description}</p>
         )}
       </div>
 
-      {/* General Settings */}
-      <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50/50">
-          <h2 className="text-lg font-medium text-gray-900">General Rules</h2>
+      {/* General Rules Card */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl">
+        <div className="px-6 py-4 border-b border-outline-variant bg-surface-bright/50 rounded-t-xl">
+          <h3 className="font-headline-md text-headline-md text-on-surface">General Rules</h3>
         </div>
-        <div className="p-6 space-y-6">
+        <div className="divide-y divide-outline-variant">
           {['buffer_minutes', 'min_notice_minutes', 'max_booking_window_days'].map(key => {
             const isOverridden = overrides[key] !== null
             const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
             
             return (
-              <div key={key} className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-gray-900">{label}</div>
-                  <div className="text-sm text-gray-500">
-                    {isOverridden ? 'Custom value' : `Inherited value: ${data.resolved[key]}`}
+              <div key={key} className="px-6 py-4 flex items-center justify-between hover:bg-surface-bright transition-colors">
+                <div>
+                  <div className="font-label-md text-label-md text-on-surface mb-1">{label}</div>
+                  <div className="font-body-sm text-body-sm text-on-surface-variant">
+                    {isOverridden ? 'Custom value overridden' : `Inherited value: ${data.resolved[key]}`}
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   {isOverridden && (
                     <input 
                       type="number"
-                      className="border border-gray-300 rounded px-3 py-1.5 text-sm w-24 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="border border-outline-variant bg-surface-container-lowest text-on-surface rounded px-3 py-1.5 text-sm w-24 focus:ring-primary focus:border-primary"
                       value={overrides[key]}
                       onChange={(e) => setOverrides(prev => ({...prev, [key]: parseInt(e.target.value) || 0}))}
                     />
                   )}
                   <button
                     onClick={() => toggleOverride(key)}
-                    className={`text-xs font-medium px-3 py-1.5 rounded transition-colors ${
-                      isOverridden 
-                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
-                        : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
-                    }`}
+                    className="px-4 py-1.5 bg-secondary-fixed hover:bg-secondary-fixed-dim text-on-secondary-fixed font-label-md text-label-md rounded-lg transition-colors border border-outline-variant/30"
                   >
                     {isOverridden ? 'Use Inherited' : 'Customize'}
                   </button>
@@ -90,36 +86,49 @@ export default function AvailabilityEditor({
         </div>
       </div>
 
-      {/* Weekly Schedule */}
-      <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50/50">
-          <h2 className="text-lg font-medium text-gray-900">Weekly Schedule</h2>
+      {/* Weekly Schedule Card */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl">
+        <div className="px-6 py-4 border-b border-outline-variant bg-surface-bright/50 rounded-t-xl flex items-center justify-between">
+          <h3 className="font-headline-md text-headline-md text-on-surface">Weekly Schedule</h3>
           <button
             onClick={() => toggleOverride('weekly_schedule')}
-            className={`text-xs font-medium px-3 py-1.5 rounded transition-colors ${
-              overrides.weekly_schedule !== null 
-                ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' 
-                : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-            }`}
+            className="px-4 py-1.5 bg-secondary-fixed hover:bg-secondary-fixed-dim text-on-secondary-fixed font-label-md text-label-md rounded-lg transition-colors border border-outline-variant/30"
           >
             {overrides.weekly_schedule !== null ? 'Reset to Inherited' : 'Customize Schedule'}
           </button>
         </div>
-        <div className="divide-y divide-gray-100">
-          {DAYS.map(day => {
+        <div className="divide-y divide-outline-variant">
+          {DAYS.map((day, idx) => {
             const isCustomizing = overrides.weekly_schedule !== null
             const blocks = isCustomizing ? overrides.weekly_schedule[day] : data.resolved.weekly_schedule[day]
+            const isWeekend = day === 'sat' || day === 'sun'
+            const hasBlocks = blocks && blocks.length > 0
             
             return (
-              <div key={day} className="p-6 flex flex-col sm:flex-row sm:items-start gap-4">
-                <div className="w-32 font-medium text-sm text-gray-900 flex items-center h-8 capitalize">
+              <div 
+                key={day} 
+                className={`px-6 py-4 flex items-center grid grid-cols-12 hover:bg-surface-bright transition-colors ${
+                  !hasBlocks ? 'opacity-60' : ''
+                } ${idx === DAYS.length - 1 ? 'rounded-b-xl' : ''}`}
+              >
+                <div className={`col-span-3 font-label-md text-label-md capitalize ${
+                  !hasBlocks ? 'text-on-surface-variant' : 'text-on-surface'
+                }`}>
                   {DAY_NAMES[day]}
                 </div>
                 
-                <div className="flex-1">
+                <div className="col-span-9">
                   {!isCustomizing ? (
-                    <div className="flex items-center min-h-[2rem]">
-                      {renderTimeBlocks(blocks)}
+                    <div className="flex flex-wrap gap-2">
+                      {hasBlocks ? (
+                        blocks.map((b, i) => (
+                          <div key={i} className="px-3 py-1 bg-surface-variant/50 text-on-surface-variant rounded font-code text-code border border-outline-variant/30">
+                            {b[0]} - {b[1]}
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-on-surface-variant italic text-xs">Unavailable</span>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -133,9 +142,9 @@ export default function AvailabilityEditor({
                               newBlocks[idx] = [e.target.value, block[1]]
                               handleDayChange(day, newBlocks)
                             }}
-                            className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="border border-outline-variant bg-surface-container-lowest text-on-surface rounded px-2 py-1 text-sm focus:ring-primary focus:border-primary"
                           />
-                          <span className="text-gray-500">-</span>
+                          <span className="text-on-surface-variant">-</span>
                           <input 
                             type="time" 
                             value={block[1]} 
@@ -144,14 +153,14 @@ export default function AvailabilityEditor({
                               newBlocks[idx] = [block[0], e.target.value]
                               handleDayChange(day, newBlocks)
                             }}
-                            className="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="border border-outline-variant bg-surface-container-lowest text-on-surface rounded px-2 py-1 text-sm focus:ring-primary focus:border-primary"
                           />
                           <button
                             onClick={() => {
                               const newBlocks = blocks.filter((_, i) => i !== idx)
                               handleDayChange(day, newBlocks)
                             }}
-                            className="ml-2 text-red-500 hover:text-red-700"
+                            className="ml-2 text-error hover:text-red-700 transition-colors"
                             title="Remove time block"
                           >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -165,7 +174,7 @@ export default function AvailabilityEditor({
                           const newBlocks = [...blocks, ["09:00", "17:00"]]
                           handleDayChange(day, newBlocks)
                         }}
-                        className="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 mt-2"
+                        className="text-sm text-primary hover:underline font-medium flex items-center gap-1 mt-2"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -185,7 +194,7 @@ export default function AvailabilityEditor({
         <button
           onClick={onSave}
           disabled={isSaving}
-          className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors shadow-sm"
+          className="px-6 py-2.5 bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all border border-primary/20 disabled:opacity-50"
         >
           {isSaving ? 'Saving...' : 'Save Availability Overrides'}
         </button>
