@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { insightsApi } from '../../api/insights'
 import { membersApi } from '../../api/members'
 import BookingsTable from '../../components/bookings/BookingsTable'
+import DateRangeFilter from '../../components/insights/DateRangeFilter'
 
 export default function InsightsPage() {
   const { identity } = useAuth()
@@ -34,7 +35,15 @@ export default function InsightsPage() {
     }).catch(err => console.error("Failed to fetch members for insights lookup", err))
   }, [])
 
+  const abortRef = useRef(null)
+
   useEffect(() => {
+    if (!startDate || !endDate) return
+
+    // Cancel any in-flight request
+    if (abortRef.current) abortRef.current.abort()
+    abortRef.current = new AbortController()
+
     const fetchData = async () => {
       setIsLoading(true)
       setError(null)
@@ -46,16 +55,15 @@ export default function InsightsPage() {
         setUtilization(utilRes)
         setBookings(bookingsRes)
       } catch (err) {
-        console.error("Failed to fetch insights", err)
-        setError("Failed to load insights data.")
+        if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') return
+        console.error('Failed to fetch insights', err)
+        setError('Failed to load insights data.')
       } finally {
         setIsLoading(false)
       }
     }
 
-    if (startDate && endDate) {
-      fetchData()
-    }
+    fetchData()
   }, [startDate, endDate, bookingStatusFilter])
 
   // Compute Member Breakdown
@@ -105,21 +113,11 @@ export default function InsightsPage() {
           </p>
         </div>
         
-        <div className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-sm border border-gray-200">
-          <input 
-            type="date" 
-            value={startDate}
-            onChange={e => setStartDate(e.target.value)}
-            className="border-none text-sm focus:ring-0 text-gray-700 bg-transparent"
-          />
-          <span className="text-gray-400">to</span>
-          <input 
-            type="date" 
-            value={endDate}
-            onChange={e => setEndDate(e.target.value)}
-            className="border-none text-sm focus:ring-0 text-gray-700 bg-transparent"
-          />
-        </div>
+        <DateRangeFilter
+          startDate={startDate}
+          endDate={endDate}
+          onChange={(s, e) => { setStartDate(s); setEndDate(e) }}
+        />
       </div>
 
       {error && (
