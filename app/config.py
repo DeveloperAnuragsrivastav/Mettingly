@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     SENDGRID_API_KEY: str = ""
     SENDGRID_FROM_EMAIL: str = ""
 
+    # Groq LLM API key — used by ai_engine.py for insight generation
+    GROQ_API_KEY: str = ""
+
     # ── URL Configuration ────────────────────────────────────────────
     # Public URL where the React frontend is served.
     # Used to build manage-booking, reschedule, cancel, and onboarding links
