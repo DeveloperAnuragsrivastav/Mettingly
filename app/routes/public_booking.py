@@ -10,6 +10,7 @@ from app.services.team_availability import get_aggregated_team_slots, get_aggreg
 from app.services.booking_engine import create_booking, SlotNoLongerAvailableError
 from app.services.calendar_sync import sync_booking_to_calendar
 from app.services.notifications import queue_booking_confirmation_notifications, queue_reminder_notifications
+import threading
 
 router = APIRouter(tags=["Public Booking"])
 
@@ -89,6 +90,15 @@ def create_team_booking(request: Request, team_slug: str, req: PublicBookingRequ
     # Generate Notifications
     queue_booking_confirmation_notifications(b_id)
     queue_reminder_notifications(b_id)
+
+    # Generate AI booking_summary insight in background (non-blocking)
+    def _gen():
+        try:
+            from app.services.ai_engine import generate_insight
+            generate_insight("booking_summary", b_id)
+        except Exception:
+            pass
+    threading.Thread(target=_gen, daemon=True).start()
         
     sync_result = sync_booking_to_calendar(b_id)
     
@@ -163,7 +173,16 @@ def create_campaign_booking(request: Request, page_slug: str, req: PublicBooking
     # Generate Notifications
     queue_booking_confirmation_notifications(b_id)
     queue_reminder_notifications(b_id)
-        
+
+    # Generate AI booking_summary insight in background (non-blocking)
+    def _gen_campaign():
+        try:
+            from app.services.ai_engine import generate_insight
+            generate_insight("booking_summary", b_id)
+        except Exception:
+            pass
+    threading.Thread(target=_gen_campaign, daemon=True).start()
+
     sync_result = sync_booking_to_calendar(b_id)
     
     return {
