@@ -248,6 +248,17 @@ def dispatch_pending_notifications(limit: int = 50) -> dict:
                         context["first_name"] = member_first_name
                         context["other_party_name"] = booking.get("caller_name", "Caller")
                         context["timezone"] = member_tz
+
+                        # For 15-min reminders: generate meeting_prep insight just-in-time
+                        # ONLY for the member — caller email context is never touched
+                        if n["notification_type"] == "reminder_15min":
+                            try:
+                                from app.services.ai_engine import generate_insight
+                                prep = generate_insight("meeting_prep", UUID(booking["id"]))
+                                if prep:
+                                    context["meeting_prep"] = prep
+                            except Exception as _prep_err:
+                                logger.warning(f"meeting_prep generation skipped for {booking['id']}: {_prep_err}")
                     else:
                         context["first_name"] = caller_first_name
                         context["other_party_name"] = member_full_name
