@@ -17,6 +17,27 @@
     {% endif %}
 </div>
 
+{% if meeting_prep %}
+<div class="details-box" style="margin-top:16px;border-color:#e9d5ff;background-color:#faf5ff;">
+    <p style="margin:0 0 10px;color:#7e22ce;font-weight:700;">✨ AI Meeting Prep</p>
+
+    {% if meeting_prep.is_repeat_caller == true or meeting_prep.is_repeat_caller == 'true' %}
+    <div style="font-size:12px;margin-bottom:10px;padding:3px 8px;background:#f3e8ff;border-radius:4px;color:#6b21a8;display:inline-block;font-weight:600;">🔄 Repeat Caller</div>
+    {% endif %}
+
+    <p style="font-size:14px;color:#374151;margin:0 0 10px;">{{ meeting_prep.caller_context }}</p>
+
+    {% if meeting_prep.talking_points %}
+    <p style="font-size:13px;font-weight:600;color:#6b21a8;margin:0 0 4px;">Suggested Talking Points:</p>
+    <ul style="margin:0;padding-left:18px;font-size:14px;color:#374151;">
+        {% for point in meeting_prep.talking_points %}
+        <li style="margin-bottom:3px;">{{ point }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endif %}
+
 {% if booking.google_meet_link %}
 <p style="margin-top: 24px; margin-bottom: 8px;"><strong>Meeting Link</strong></p>
 <a href="{{ booking.google_meet_link }}" class="button" style="background-color: #059669;">Join Google Meet</a>
