@@ -92,6 +92,11 @@ def get_bookings(
         b["ai_category"] = None
         b["ai_meeting_prep_status"] = None
         b["ai_meeting_prep_content"] = None
+        b["ai_followup_status"] = None
+        b["ai_followup_content"] = None
+        b["ai_meeting_notes_status"] = None
+        b["ai_meeting_notes_content"] = None
+        b["ai_action_items"] = []
 
         for insight in (b.pop("ai_insights", None) or []):
             if insight.get("insight_type") == "booking_summary":
@@ -105,6 +110,28 @@ def get_bookings(
                 if str(member.id) == b.get("assigned_member_id"):
                     b["ai_meeting_prep_status"] = insight.get("status")
                     b["ai_meeting_prep_content"] = insight.get("content")
+            elif insight.get("insight_type") == "followup_draft":
+                b["ai_followup_status"] = insight.get("status")
+                if str(member.id) == b.get("assigned_member_id"):
+                    b["ai_followup_content"] = insight.get("content")
+            elif insight.get("insight_type") == "meeting_notes":
+                b["ai_meeting_notes_status"] = insight.get("status")
+                # Exposed to everyone (admins included) per spec
+                b["ai_meeting_notes_content"] = insight.get("content")
+    
+    # Fetch action items for the bookings
+    booking_ids = [b["id"] for b in bookings_data]
+    if booking_ids:
+        action_items_resp = supabase.table("meeting_action_items").select("id, booking_id, description, is_done").in_("booking_id", booking_ids).execute()
+        action_items_map = {}
+        for item in action_items_resp.data:
+            bid = item.pop("booking_id")
+            if bid not in action_items_map:
+                action_items_map[bid] = []
+            action_items_map[bid].append(item)
+            
+        for b in bookings_data:
+            b["ai_action_items"] = action_items_map.get(b["id"], [])
     
     # --- EXTERNAL CALENDAR EVENTS FETCH ---
     external_events = []

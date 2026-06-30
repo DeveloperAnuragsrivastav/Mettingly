@@ -1,1 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #004bca;
+  --color-primary-hover: #003ea8;
+  --color-accent: #0061ff;
+  
+  --color-indigo-50: #f1f3ff;
+  --color-indigo-100: #e9edff;
+  --color-indigo-200: #e1e8fd;
+  --color-indigo-300: #dce2f7;
+  --color-indigo-400: #8ba8ff;
+  --color-indigo-500: #0061ff;
+  --color-indigo-600: #004bca;
+  --color-indigo-700: #003ea8;
+  --color-indigo-800: #00174b;
+  --color-indigo-900: #000a26;
+  --color-indigo-950: #000514;
+  
+  --color-gray-50: #f9f9ff;
+  --color-gray-100: #f1f3ff;
+  --color-gray-200: #e9edff;
+  --color-gray-300: #c2c6d9;
+  --color-gray-400: #737687;
+  --color-gray-500: #585f6c;
+  --color-gray-600: #424656;
+  --color-gray-700: #293040;
+  --color-gray-800: #141b2b;
+  --color-gray-900: #141b2b;
+
+  --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", monospace;
+  
+  --radius-lg: 6px;
+  --radius-xl: 10px;
+}
+
+body {
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-800);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray-400);
+}
+
+/* Focus ring refinements for form elements */
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--color-indigo-500) !important;
+  outline-offset: 0px;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 4px rgba(0, 97, 255, 0.15) !important;
+}
+
+/* Table refinements */
+th {
+  font-weight: 600 !important;
+  letter-spacing: 0.03em;
+  color: var(--color-gray-500) !important;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+/* Micro transitions for buttons */
+button, a, input[type="submit"] {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active:not(:disabled), a:active, input[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+/* Premium modal overlays */
+div[class*="bg-gray-900/50"], div[class*="bg-black/50"] {
+  backdrop-filter: blur(8px) !important;
+  background-color: rgba(20, 27, 43, 0.4) !important;
+  transition: all 0.3s ease-out;
+}
+

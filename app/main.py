@@ -12,6 +12,7 @@ from app.routes.me import router as me_router
 from app.routes.members import router as members_router
 from app.routes.calendar import router as calendar_router
 from app.routes.admin_insights import router as admin_insights_router
+from app.routes.action_items import router as action_items_router
 from app.routes.public_booking import router as public_booking_router
 from app.routes.manage_booking import router as manage_booking_router
 from app.routes.platform import router as platform_router
@@ -64,6 +65,7 @@ app.include_router(calendar_router)
 app.include_router(admin_insights_router)
 app.include_router(public_booking_router)
 app.include_router(manage_booking_router)
+app.include_router(action_items_router)
 app.include_router(platform_router)
 app.include_router(teams_router)
 app.include_router(availability_router)

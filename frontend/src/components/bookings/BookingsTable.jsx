@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-import { Video, ExternalLink } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Video, ExternalLink, Mail, Copy, CheckSquare, Square, FileText } from 'lucide-react'
+import { insightsApi } from '../../api/insights'
 
 const STATUS_STYLES = {
   confirmed: 'bg-emerald-100 text-emerald-800',
@@ -49,6 +50,286 @@ function AiTooltip({ text }) {
   )
 }
 
+function FollowupCell({ booking, isAdminView }) {
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [notes, setNotes] = useState('')
+  const [draft, setDraft] = useState(booking.ai_followup_content || null)
+  
+  useEffect(() => {
+    if (booking.ai_followup_content) {
+      setDraft(booking.ai_followup_content)
+    }
+  }, [booking.ai_followup_content])
+
+  const isPast = !isUpcoming(booking.start_time_utc)
+  const isConfirmed = booking.status === 'confirmed' || booking.status === 'external'
+
+  if (isAdminView) {
+    if (!isPast || !isConfirmed) return <span className="text-gray-300 text-sm">—</span>
+    if (booking.ai_followup_status === 'generated') {
+      return <span className="text-xs text-emerald-600 font-medium whitespace-nowrap">✓ Sent-side generated</span>
+    }
+    return <span className="text-xs text-gray-500 whitespace-nowrap">— Not yet</span>
+  }
+
+  if (!isPast || !isConfirmed) {
+    return <span className="text-gray-300 text-sm">—</span>
+  }
+
+  const handleGenerate = async (regenerate = false) => {
+    if (!notes.trim()) return
+    setIsGenerating(true)
+    try {
+      const res = await insightsApi.generateFollowup(booking.id, notes, regenerate)
+      setDraft(res)
+      booking.ai_followup_status = 'generated'
+    } catch (err) {
+      alert('Failed to generate follow-up')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const copyToClipboard = () => {
+    if (!draft) return
+    const text = `Subject: ${draft.subject}\n\n${draft.body}`
+    navigator.clipboard.writeText(text)
+    alert('Copied to clipboard!')
+  }
+
+  return (
+    <div>
+      {booking.ai_followup_status === 'generated' ? (
+        <button onClick={() => setIsModalOpen(true)} className="text-xs font-medium text-indigo-600 hover:text-indigo-800 whitespace-nowrap border border-indigo-200 px-2 py-1 rounded bg-indigo-50">
+          View / Edit Draft
+        </button>
+      ) : (
+        <button onClick={() => setIsModalOpen(true)} className="text-xs px-2 py-1 bg-white text-gray-700 border border-gray-300 rounded shadow-sm hover:bg-gray-50 whitespace-nowrap">
+          Generate Follow-up
+        </button>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">Follow-up Draft</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-xl font-medium">&times;</button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Post-Meeting Notes <span className="text-red-500">*</span></label>
+                <textarea 
+                  className="w-full border border-gray-300 rounded-lg shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5"
+                  rows={3}
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="What was discussed, any next steps..."
+                />
+              </div>
+              
+              <div>
+                <button 
+                  onClick={() => handleGenerate(!!draft)} 
+                  disabled={!notes.trim() || isGenerating}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isGenerating ? 'Generating...' : (draft ? 'Regenerate Draft' : 'Generate Draft')}
+                </button>
+              </div>
+
+              {draft && (
+                <div className="pt-5 border-t border-gray-200 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Subject</label>
+                    <input 
+                      type="text" 
+                      className="w-full border border-gray-300 rounded-lg shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5"
+                      value={draft.subject}
+                      onChange={e => setDraft({...draft, subject: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Body</label>
+                    <textarea 
+                      className="w-full border border-gray-300 rounded-lg shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 p-2.5 font-mono text-sm leading-relaxed"
+                      rows={8}
+                      value={draft.body}
+                      onChange={e => setDraft({...draft, body: e.target.value})}
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <button 
+                      onClick={copyToClipboard}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 text-sm font-medium rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+                    >
+                      <Copy className="w-4 h-4" />
+                      Copy
+                    </button>
+                    <a 
+                      href={`mailto:${booking.caller_email}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}`}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-transparent bg-indigo-50 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-100 transition-colors"
+                    >
+                      <Mail className="w-4 h-4" />
+                      Email Client
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MeetingNotesCell({ booking, isAdminView }) {
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [notes, setNotes] = useState('')
+  const [content, setContent] = useState(booking.ai_meeting_notes_content || null)
+  const [actionItems, setActionItems] = useState(booking.ai_action_items || [])
+  
+  useEffect(() => {
+    if (booking.ai_meeting_notes_content) setContent(booking.ai_meeting_notes_content)
+    if (booking.ai_action_items) setActionItems(booking.ai_action_items)
+  }, [booking.ai_meeting_notes_content, booking.ai_action_items])
+
+  const isPast = (new Date(booking.start_time_utc) < new Date())
+  const isConfirmed = booking.status === 'confirmed' || booking.status === 'external'
+
+  if (!isPast || !isConfirmed) {
+    return <span className="text-gray-300 text-sm">—</span>
+  }
+
+  const hasNotes = booking.ai_meeting_notes_status === 'generated'
+
+  if (isAdminView && !hasNotes) {
+    return <span className="text-xs text-gray-500 whitespace-nowrap">— Not generated</span>
+  }
+
+  const handleGenerate = async (regenerate = false) => {
+    if (!notes.trim()) return
+    setIsGenerating(true)
+    try {
+      const res = await insightsApi.generateNotes(booking.id, notes, regenerate)
+      setContent({ key_points: res.key_points, decisions: res.decisions })
+      setActionItems(res.action_items || [])
+      booking.ai_meeting_notes_status = 'generated'
+    } catch (err) {
+      alert('Failed to generate notes')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const toggleActionItem = async (item) => {
+    const newStatus = !item.is_done
+    setActionItems(prev => prev.map(i => i.id === item.id ? { ...i, is_done: newStatus } : i))
+    try {
+      await insightsApi.updateActionItem(item.id, newStatus)
+    } catch (err) {
+      alert('Failed to update action item')
+      setActionItems(prev => prev.map(i => i.id === item.id ? { ...i, is_done: !newStatus } : i))
+    }
+  }
+
+  return (
+    <div>
+      {hasNotes ? (
+        <button onClick={() => setIsModalOpen(true)} className="text-xs font-medium text-emerald-700 hover:text-emerald-900 whitespace-nowrap border border-emerald-200 px-2 py-1 rounded bg-emerald-50 flex items-center gap-1">
+          <FileText className="w-3.5 h-3.5" />
+          View Notes
+        </button>
+      ) : (
+        <button onClick={() => setIsModalOpen(true)} className="text-xs px-2 py-1 bg-white text-gray-700 border border-gray-300 rounded shadow-sm hover:bg-gray-50 whitespace-nowrap">
+          Generate Notes
+        </button>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">Internal Meeting Notes</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 text-xl font-medium">&times;</button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-6">
+              {!isAdminView && (
+                <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700">Your Rough Notes <span className="text-red-500">*</span></label>
+                  <textarea 
+                    className="w-full border border-gray-300 rounded-lg shadow-sm sm:text-sm focus:ring-emerald-500 focus:border-emerald-500 p-2.5"
+                    rows={3}
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    placeholder="Jot down what happened..."
+                  />
+                  <button 
+                    onClick={() => handleGenerate(hasNotes)} 
+                    disabled={!notes.trim() || isGenerating}
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                  >
+                    {isGenerating ? 'Generating...' : (hasNotes ? 'Regenerate Notes' : 'Generate Notes')}
+                  </button>
+                </div>
+              )}
+
+              {content && (
+                <div className="space-y-6">
+                  {content.key_points && content.key_points.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">Key Points</h4>
+                      <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                        {content.key_points.map((kp, i) => <li key={i}>{kp}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {content.decisions && content.decisions.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">Decisions</h4>
+                      <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                        {content.decisions.map((d, i) => <li key={i}>{d}</li>)}
+                      </ul>
+                    </div>
+                  )}
+
+                  {actionItems && actionItems.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">Action Items</h4>
+                      <div className="space-y-2">
+                        {actionItems.map((item) => (
+                          <div 
+                            key={item.id} 
+                            onClick={() => toggleActionItem(item)}
+                            className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${item.is_done ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 hover:border-emerald-400 shadow-sm'}`}
+                          >
+                            <button className={`mt-0.5 flex-shrink-0 transition-colors ${item.is_done ? 'text-emerald-500' : 'text-gray-400'}`}>
+                              {item.is_done ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                            </button>
+                            <span className={`text-sm select-none ${item.is_done ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
+                              {item.description}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /**
  * Shared bookings table used by both InsightsPage (admin view) and MyBookingsPage (member view).
  *
@@ -68,8 +349,8 @@ export default function BookingsTable({
   membersMap = {},
   emptyMessage = 'No bookings found.',
 }) {
-  // colCount: Date + Caller + (Host?) + Duration + Status + AI Insight + (Meet?)
-  const colCount = 5 + (showHost ? 1 : 0) + (showMeetLink ? 1 : 0)
+  // colCount: Date + Caller + (Host?) + Duration + Status + AI Insight + Follow-up + Notes + (Meet?)
+  const colCount = 7 + (showHost ? 1 : 0) + (showMeetLink ? 1 : 0)
 
   return (
     <div className="overflow-x-auto">
@@ -102,6 +383,12 @@ export default function BookingsTable({
                 AI Insight
               </div>
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Follow-up
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Internal Notes
+            </th>
             {showMeetLink && (
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Meet
@@ -109,11 +396,14 @@ export default function BookingsTable({
             )}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {isLoading ? (
+        <tbody className={`bg-white divide-y divide-gray-200 ${isLoading && bookings.length > 0 ? 'opacity-50 pointer-events-none transition-opacity duration-200' : ''}`}>
+          {isLoading && bookings.length === 0 ? (
             <tr>
               <td colSpan={colCount} className="px-6 py-8 text-center text-gray-500">
-                Loading bookings…
+                <div className="flex items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin text-gray-400"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                  Loading bookings…
+                </div>
               </td>
             </tr>
           ) : bookings.length === 0 ? (
@@ -255,6 +545,16 @@ export default function BookingsTable({
                     ) : (
                       <span className="text-gray-300 text-sm">—</span>
                     )}
+                  </td>
+
+                  {/* Follow-up */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <FollowupCell booking={b} isAdminView={showHost} />
+                  </td>
+
+                  {/* Meeting Notes */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <MeetingNotesCell booking={b} isAdminView={showHost} />
                   </td>
 
                   {/* Meet link */}

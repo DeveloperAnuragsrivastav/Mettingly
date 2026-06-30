@@ -33,5 +33,28 @@ export const insightsApi = {
     }
     const res = await apiClient.get('/insights/audit-log', { params })
     return res.data
+  },
+
+  generateFollowup: async (bookingId, memberNotes, regenerate = false) => {
+    const res = await apiClient.post(`/bookings/${bookingId}/generate-followup`, {
+      member_notes: memberNotes,
+      regenerate: regenerate
+    })
+    return res.data
+  },
+
+  generateNotes: async (bookingId, memberNotes, regenerate = false) => {
+    const res = await apiClient.post(`/bookings/${bookingId}/generate-notes`, {
+      member_notes: memberNotes,
+      regenerate: regenerate
+    })
+    return res.data
+  },
+
+  updateActionItem: async (itemId, isDone) => {
+    const res = await apiClient.patch(`/action-items/${itemId}`, {
+      is_done: isDone
+    })
+    return res.data
   }
 }

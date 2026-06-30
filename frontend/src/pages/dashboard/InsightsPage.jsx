@@ -127,7 +127,7 @@ export default function InsightsPage() {
       )}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 transition-opacity duration-200 ${isLoading && utilization ? 'opacity-50' : ''}`}>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="text-sm font-medium text-gray-500 mb-1">Total Bookings</div>
           <div className="text-3xl font-bold text-gray-900">{utilization?.summary?.bookings_count || 0}</div>
@@ -154,7 +154,7 @@ export default function InsightsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 transition-opacity duration-200 ${isLoading && utilization ? 'opacity-50' : ''}`}>
         {/* Member Breakdown */}
         <div className="lg:col-span-1 bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden flex flex-col">
           <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
@@ -213,7 +213,7 @@ export default function InsightsPage() {
           <div className="flex-1 overflow-x-auto">
             <BookingsTable
               bookings={bookings?.items || []}
-              isLoading={isLoading && !bookings}
+              isLoading={isLoading}
               showHost={true}
               showMeetLink={false}
               membersMap={membersMap}

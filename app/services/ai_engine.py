@@ -48,31 +48,36 @@ def _call_llm(prompt: str) -> str:
         raise LLMProviderError(f"LLM Provider failed: {str(e)}")
 
 
-def generate_insight(insight_type: str, booking_id: UUID) -> Dict[str, Any]:
+def generate_insight(insight_type: str, booking_id: UUID, regenerate: bool = False, member_notes: str = None) -> Dict[str, Any]:
     """
     Generates an AI insight for a booking.
-    Supported types: 'booking_summary', 'meeting_prep'.
-    Idempotent — returns existing generated content immediately.
+    Supported types: 'booking_summary', 'meeting_prep', 'followup_draft', 'meeting_notes'.
+    Idempotent — returns existing generated content immediately unless regenerate=True.
     """
-    if insight_type not in ("booking_summary", "meeting_prep"):
+    if insight_type not in ("booking_summary", "meeting_prep", "followup_draft", "meeting_notes"):
         raise ValueError(f"Invalid insight type: {insight_type}")
 
     supabase = get_supabase_client()
 
     # Idempotency — return immediately if already generated or pending
-    existing = (
-        supabase.table("ai_insights")
-        .select("id, status, content")
-        .eq("booking_id", str(booking_id))
-        .eq("insight_type", insight_type)
-        .execute()
-    )
-    if existing.data:
-        row = existing.data[0]
-        if row["status"] == "generated":
-            return row["content"]
-        if row["status"] == "pending":
-            return {}  # another worker is already running, skip
+    if regenerate:
+        supabase.table("ai_insights").delete().eq("booking_id", str(booking_id)).eq("insight_type", insight_type).execute()
+        if insight_type == "meeting_notes":
+            supabase.table("meeting_action_items").delete().eq("booking_id", str(booking_id)).eq("is_done", False).execute()
+    else:
+        existing = (
+            supabase.table("ai_insights")
+            .select("id, status, content")
+            .eq("booking_id", str(booking_id))
+            .eq("insight_type", insight_type)
+            .execute()
+        )
+        if existing.data:
+            row = existing.data[0]
+            if row["status"] == "generated":
+                return row["content"]
+            if row["status"] == "pending":
+                return {}  # another worker is already running, skip
 
     # Fetch booking + org + team context
     b_resp = (
@@ -121,7 +126,7 @@ Analyze the meeting details and output ONLY valid JSON in this exact shape:
   "category": "<short label e.g. Support, Sales, Consultation>"
 }}"""
 
-        else:  # meeting_prep
+        elif insight_type == "meeting_prep":
             # Reuse existing booking_summary tldr if available
             summary_resp = (
                 supabase.table("ai_insights")
@@ -172,6 +177,74 @@ Output ONLY valid JSON in this exact shape:
   "is_repeat_caller": {"true" if is_repeat else "false"}
 }}"""
 
+        elif insight_type == "followup_draft":
+            if not member_notes:
+                raise ValueError("member_notes are required for followup_draft")
+                
+            # Reuse existing booking_summary tldr if available
+            summary_resp = (
+                supabase.table("ai_insights")
+                .select("content")
+                .eq("booking_id", str(booking_id))
+                .eq("insight_type", "booking_summary")
+                .eq("status", "generated")
+                .execute()
+            )
+            summary_tldr = (
+                summary_resp.data[0]["content"].get("tldr", "")
+                if summary_resp.data else "No summary available"
+            )
+            
+            prompt = f"""You are an AI assistant for {org_name}, drafting a post-meeting follow-up email on behalf of {team_name}.
+Meeting was with: {booking.get('caller_name', 'the client')} ({booking.get('caller_email', 'unknown')})
+
+Context:
+- Booking summary: {summary_tldr}
+- Reason for meeting: {reason}
+- Member's Post-Meeting Notes: {member_notes}
+
+Write a professional, polite, and concise follow-up email draft based strictly on the member's notes. Do not invent commitments not mentioned in the notes.
+
+Output ONLY valid JSON in this exact shape:
+{{
+  "subject": "<suggested email subject>",
+  "body": "<draft email body text>"
+}}"""
+
+        else:  # meeting_notes
+            if not member_notes:
+                raise ValueError("member_notes are required for meeting_notes")
+                
+            summary_resp = (
+                supabase.table("ai_insights")
+                .select("content")
+                .eq("booking_id", str(booking_id))
+                .eq("insight_type", "booking_summary")
+                .eq("status", "generated")
+                .execute()
+            )
+            summary_tldr = (
+                summary_resp.data[0]["content"].get("tldr", "")
+                if summary_resp.data else "No summary available"
+            )
+            
+            prompt = f"""You are an AI assistant for {org_name}.
+Meeting was with: {booking.get('caller_name', 'the client')} ({booking.get('caller_email', 'unknown')})
+
+Context:
+- Booking summary TL;DR: {summary_tldr}
+- Reason for meeting: {reason}
+- Member's Post-Meeting Notes: {member_notes}
+
+Extract key points, decisions, and action items strictly from the member's notes. Do not invent details not mentioned in the notes.
+
+Output ONLY valid JSON in this exact shape:
+{{
+  "key_points": ["<point 1>", "<point 2>"],
+  "decisions": ["<decision 1>", "<decision 2>"],
+  "action_items": ["<action item 1>", "<action item 2>"]
+}}"""
+
         # Call LLM
         raw = _call_llm(prompt)
 
@@ -187,17 +260,43 @@ Output ONLY valid JSON in this exact shape:
                 raise LLMProviderError(f"Missing keys in booking_summary response: {content}")
             if content.get("priority") not in ("low", "medium", "high"):
                 raise LLMProviderError(f"Invalid priority: {content.get('priority')}")
-        else:
+        elif insight_type == "meeting_prep":
             if not {"caller_context", "talking_points", "is_repeat_caller"}.issubset(content.keys()):
                 raise LLMProviderError(f"Missing keys in meeting_prep response: {content}")
             if not isinstance(content.get("talking_points"), list):
                 raise LLMProviderError("talking_points must be a list")
+        elif insight_type == "followup_draft":
+            if not {"subject", "body"}.issubset(content.keys()):
+                raise LLMProviderError(f"Missing keys in followup_draft response: {content}")
+        else:  # meeting_notes
+            if not {"key_points", "decisions", "action_items"}.issubset(content.keys()):
+                raise LLMProviderError(f"Missing keys in meeting_notes response: {content}")
+            
+            # Pop action_items out so they are not stored in ai_insights
+            action_items = content.pop("action_items", [])
 
         # Mark as generated
         supabase.table("ai_insights").update({
             "status": "generated",
-            "content": content,
-        }).eq("id", insight_id).execute()
+            "content": content
+        }).eq("booking_id", str(booking_id)).eq("insight_type", insight_type).execute()
+
+        # Separately insert action items
+        if insight_type == "meeting_notes" and action_items:
+            action_rows = []
+            for item in action_items:
+                action_rows.append({
+                    "booking_id": str(booking_id),
+                    "organization_id": str(org_id),
+                    "description": item,
+                    "is_done": False
+                })
+            if action_rows:
+                supabase.table("meeting_action_items").insert(action_rows).execute()
+
+        # Put action_items back into the return payload for immediate frontend use
+        if insight_type == "meeting_notes":
+            content["action_items"] = action_rows
 
         return content
 
