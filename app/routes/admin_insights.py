@@ -65,7 +65,9 @@ def get_bookings(
     scope = get_role_scope_filter(member, member_col="assigned_member_id")
     
     query = supabase.table("bookings").select(
-        "id, caller_name, caller_email, start_time_utc, end_time_utc, status, assigned_member_id, google_meet_link, custom_form_responses"
+        "id, caller_name, caller_email, start_time_utc, end_time_utc, status, "
+        "assigned_member_id, google_meet_link, google_event_id, custom_form_responses, "
+        "ai_insights(insight_type, status, content)"
     )
     query = query.gte("start_time_utc", start_date.isoformat()).lte("start_time_utc", end_date.isoformat() + "T23:59:59Z")
     
@@ -81,6 +83,28 @@ def get_bookings(
     # Simple unpaginated or simulated pagination for now
     resp = query.order("start_time_utc", desc=True).limit(100).execute()
     bookings_data = resp.data
+
+    # Map AI Insights fields per booking
+    for b in bookings_data:
+        b["ai_summary_status"] = None
+        b["ai_priority"] = None
+        b["ai_tldr"] = None
+        b["ai_category"] = None
+        b["ai_meeting_prep_status"] = None
+        b["ai_meeting_prep_content"] = None
+
+        for insight in (b.pop("ai_insights", None) or []):
+            if insight.get("insight_type") == "booking_summary":
+                b["ai_summary_status"] = insight.get("status")
+                content = insight.get("content") or {}
+                b["ai_priority"] = content.get("priority")
+                b["ai_tldr"] = content.get("tldr")
+                b["ai_category"] = content.get("category")
+            elif insight.get("insight_type") == "meeting_prep":
+                # Only expose prep notes to the assigned member themselves
+                if str(member.id) == b.get("assigned_member_id"):
+                    b["ai_meeting_prep_status"] = insight.get("status")
+                    b["ai_meeting_prep_content"] = insight.get("content")
     
     # --- EXTERNAL CALENDAR EVENTS FETCH ---
     external_events = []
